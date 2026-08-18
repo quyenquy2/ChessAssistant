@@ -23,11 +23,16 @@ Lần đầu vào `https://www.chess.com/play/...` (live game, /analysis, /play/
 2. **Giữ `Ctrl + Q` (hoặc phím đã đặt)** → ô góc phải hiện nước đi tốt nhất + số đánh giá (eval) + độ sâu.
 3. **Thả phím** → ô biến mất.
 
-### Đổi phím tắt
+### Đổi phím tắt & độ thông minh
 
 - Click biểu tượng extension trên thanh công cụ (♞), hoặc vào `chrome://extensions` → Details → **Extension options**.
 - Bấm ô "Bấm tổ hợp phím..." → bấm tổ hợp mong muốn (cần ít nhất 1 phím bổ trợ Ctrl/Alt/Shift/Cmd).
-- Bấm **Lưu phím tắt** → tải lại (`F5`) trang chess.com.
+- Chọn **Độ thông minh của gợi ý**:
+  - **Nhanh** — depth 12, ~0.3s (gợi ý tức thì, dễ sai các nước sâu).
+  - **Thường** — depth 18, ~0.9s (mặc định, cân bằng).
+  - **Mạnh** — depth 22, ~2.5s (đỡ "gà" hơn hẳn).
+  - **Cực mạnh** — depth 26, ~6s (mạnh nhất, phù hợp đánh bot cỡ khá; chờ hơi lâu).
+- Bấm **Lưu** → tải lại (`F5`) trang chess.com. Đổi độ thông minh giữa chừng cũng tự áp dụng cho ván hiện tại (cache bị xoá, engine tính lại).
 
 ### Tránh các phím tắt Chrome đã chiếm
 
@@ -43,7 +48,7 @@ Tránh `Ctrl+W`, `Ctrl+T`, `Ctrl+H`, `Ctrl+Shift+Q`, ... Trên macOS tránh `Ctr
 ┌──────────────────┐      ┌───────────────────────┐
 │ fen-bridge.js    │      │ Worker (Stockfish)    │
 │  (MAIN world)    │      │  • phân tích UCI       │
-│  • game.getFEN() │      │  • depth 18, ≤900ms    │
+│  • game.getFEN() │      │  • depth 12–26, ≤6000ms│
 │  • data-cc-hint- │ ───► │                       │
 │    fen attribute │  ◄── │                       │
 │ content.js       │ uci  │                       │

@@ -97,6 +97,22 @@
     padding-top: 5px;
   }
   .note b { color: #b8c0cc; }
+  .strength {
+    display: block;
+    font-size: 9px;
+    color: #9aa3b2;
+    margin-top: 7px;
+  }
+  #strength {
+    width: 100%;
+    margin-top: 3px;
+    padding: 5px;
+    border: 1px solid #2a3242;
+    border-radius: 6px;
+    background: #1a2130;
+    color: #e8eaf0;
+    font-size: 10px;
+  }
 </style>
 </head>
 <body>
@@ -104,6 +120,13 @@
   <p class="hint">Mặc định <b>Ctrl + Q</b> (trắng) · <b>Alt + Q</b> (đen)</p>
   <div class="list" id="list"></div>
   <button id="add">+ Thêm phím tắt</button>
+  <label class="strength" for="strength">Độ thông minh của gợi ý</label>
+  <select id="strength">
+    <option value="fast">Nhanh — trả lời ngay (dễ sai)</option>
+    <option value="normal">Thường — cân bằng (mặc định)</option>
+    <option value="strong">Mạnh — nghĩ lâu hơn ~2.5s</option>
+    <option value="brutal">Cực mạnh — nghĩ ~6s (đánh bot mạnh)</option>
+  </select>
   <div class="status" id="status"></div>
   <button id="save" disabled>Lưu</button>
   <p class="note">

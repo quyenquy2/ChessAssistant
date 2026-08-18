@@ -14,10 +14,12 @@
   const addBtn = document.getElementById('add');
   const statusEl = document.getElementById('status');
   const saveBtn = document.getElementById('save');
+  const strengthEl = document.getElementById('strength');
 
   let shortcuts = [];
   let captureIndex = -1;
   let dirty = false;
+  let strength = 'normal';
 
   function codeToName(code) {
     if (code.startsWith('Key')) return code.slice(3);
@@ -102,7 +104,7 @@
     setStatus('Bấm tổ hợp phím (cần ít nhất 1 phím bổ trợ)', '');
   }
 
-  chrome.storage.sync.get(['shortcuts', 'shortcut'], (d) => {
+  chrome.storage.sync.get(['shortcuts', 'shortcut', 'strength'], (d) => {
     if (Array.isArray(d.shortcuts) && d.shortcuts.length) {
       shortcuts = d.shortcuts.map(normalize);
     } else if (d.shortcut) {
@@ -111,6 +113,8 @@
     } else {
       shortcuts = DEFAULT_SHORTCUTS.slice();
     }
+    strength = ['fast', 'normal', 'strong', 'brutal'].includes(d.strength) ? d.strength : 'normal';
+    strengthEl.value = strength;
     render();
     setStatus('Mặc định: Ctrl + Q (trắng) · Alt + Q (đen)', 'ok');
   });
@@ -153,6 +157,14 @@
 
   addBtn.addEventListener('click', addShortcut);
 
+  strengthEl.addEventListener('change', () => {
+    if (strengthEl.value === strength) return;
+    strength = strengthEl.value;
+    dirty = true;
+    saveBtn.disabled = false;
+    setStatus('Đã đổi độ thông minh — bấm "Lưu"', '');
+  });
+
   saveBtn.addEventListener('click', () => {
     if (!dirty) { saveBtn.disabled = true; return; }
     const clean = shortcuts.filter((s) => s.key);
@@ -160,13 +172,14 @@
       setStatus('Cần ít nhất 1 phím tắt hợp lệ', 'err');
       return;
     }
-    chrome.storage.sync.set({ shortcuts: clean }, () => {
+    chrome.storage.sync.set({ shortcuts: clean, strength }, () => {
       chrome.storage.sync.remove('shortcut', () => {});
       dirty = false;
       saveBtn.disabled = true;
       shortcuts = clean;
       render();
-      setStatus('✓ Đã lưu ' + clean.length + ' phím tắt. F5 trang chess.com để áp dụng.', 'ok');
+      const sName = strengthEl.options[strengthEl.selectedIndex].text;
+      setStatus('✓ Đã lưu ' + clean.length + ' phím tắt, độ thông minh: ' + sName + '. F5 trang chess.com để áp dụng.', 'ok');
     });
   });
 })();

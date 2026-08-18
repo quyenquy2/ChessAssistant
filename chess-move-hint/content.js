@@ -1,7 +1,12 @@
 (() => {
   const ENGINE_URL = chrome.runtime.getURL('engine/stockfish.js');
-  const DEPTH = 18;
-  const MOVE_TIME = 900;
+  const STRENGTHS = {
+    fast: { depth: 12, movetime: 300 },
+    normal: { depth: 18, movetime: 900 },
+    strong: { depth: 22, movetime: 2500 },
+    brutal: { depth: 26, movetime: 6000 },
+  };
+  let engineCfg = STRENGTHS.normal;
 
   const pieceLetter = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N', pawn: 'P' };
   const shortPieceLetter = { k: 'K', q: 'Q', r: 'R', b: 'B', n: 'N', p: 'P' };
@@ -68,11 +73,37 @@
 
   loadShortcutsFromStorage();
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'sync' && changes.shortcuts && changes.shortcuts.newValue) {
+    if (area !== 'sync') return;
+    if (changes.shortcuts && changes.shortcuts.newValue) {
       const next = (changes.shortcuts.newValue || []).filter(isValidShortcut);
       shortcuts = next.length ? next : DEFAULT_SHORTCUTS.slice();
     }
+    if (changes.strength && changes.strength.newValue !== changes.strength.oldValue) {
+      applyStrength(changes.strength.newValue);
+      reloadForStrength();
+    }
   });
+
+  function applyStrength(name) {
+    const s = STRENGTHS[name] || STRENGTHS.normal;
+    engineCfg = { depth: s.depth, movetime: s.movetime };
+  }
+
+  function reloadForStrength() {
+    state.cache.clear();
+    state.best = null;
+    removeBoardCursor();
+    warmup();
+  }
+
+  function loadStrengthFromStorage() {
+    chrome.storage.sync.get('strength', (d) => {
+      applyStrength(d.strength);
+      reloadForStrength();
+    });
+  }
+
+  loadStrengthFromStorage();
 
   let overlay = null;
   function ensureOverlay() {
@@ -442,7 +473,7 @@
     state.evalText = '';
     state.depthText = '';
     sendEngine('position fen ' + fen);
-    sendEngine('go depth ' + DEPTH + ' movetime ' + MOVE_TIME);
+    sendEngine('go depth ' + engineCfg.depth + ' movetime ' + engineCfg.movetime);
   }
 
   function showCached(fen) {
