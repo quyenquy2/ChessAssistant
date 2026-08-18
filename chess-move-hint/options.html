@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>Chess Move Hint</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    width: 180px;
+    padding: 8px;
+    margin: 0;
+    background: #11161f;
+    color: #e8eaf0;
+  }
+  h1 { font-size: 11px; margin: 0 0 3px; font-weight: 600; }
+  p.hint { font-size: 9px; color: #9aa3b2; margin: 0 0 7px; line-height: 1.4; }
+  .list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid #2a3242;
+    border-radius: 6px;
+    padding: 5px 6px;
+    background: #1a2130;
+  }
+  .row.active {
+    border-color: #7aa2ff;
+    outline: 2px solid rgba(122, 162, 255, 0.35);
+  }
+  .row .capture {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row .remove {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 4px;
+    background: #2a3242;
+    color: #ff8b8b;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+  }
+  .row .remove:hover { background: #3a455c; }
+  #add {
+    border: 1px dashed #2a3242;
+    border-radius: 6px;
+    padding: 6px;
+    background: transparent;
+    color: #8db9ff;
+    cursor: pointer;
+    width: 100%;
+    font-size: 10px;
+  }
+  #add:hover { background: rgba(138, 185, 255, 0.08); }
+  .status {
+    font-size: 9px;
+    margin-top: 5px;
+    min-height: 12px;
+    color: #8db9ff;
+    line-height: 1.3;
+  }
+  .status.ok { color: #7ee0a0; }
+  .status.err { color: #ff8b8b; }
+  #save {
+    margin-top: 5px;
+    width: 100%;
+    padding: 5px;
+    border: 0;
+    border-radius: 6px;
+    background: #2f6feb;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  #save:disabled { background: #33405c; color: #8e96a5; cursor: default; }
+  #save:not(:disabled):hover { background: #4178f0; }
+  .note {
+    font-size: 8px;
+    color: #7c8698;
+    margin-top: 6px;
+    line-height: 1.4;
+    border-top: 1px solid #212a3a;
+    padding-top: 5px;
+  }
+  .note b { color: #b8c0cc; }
+</style>
+</head>
+<body>
+  <h1>♞ Chess Move Hint</h1>
+  <p class="hint">Mặc định <b>Ctrl + Q</b> (trắng) · <b>Alt + Q</b> (đen)</p>
+  <div class="list" id="list"></div>
+  <button id="add">+ Thêm phím tắt</button>
+  <div class="status" id="status"></div>
+  <button id="save" disabled>Lưu</button>
+  <p class="note">
+    Sau khi lưu, <b>F5</b> lại trang chess.com để áp dụng.
+  </p>
+  <script src="options.js"></script>
+</body>
+</html>
