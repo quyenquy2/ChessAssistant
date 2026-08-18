@@ -4,6 +4,7 @@ Extension Chrome Manifest V3 giúp bạn xem **nước đi tối ưu** trên che
 
 - **Giữ** phím tắt → ô nhỏ góc phải trên cùng hiện nước đi tốt nhất (SAN: `e4`, `Nf3`, `O-O`, `Qxd5+`, ...).
 - **Thả** phím tắt → ô biến mất ngay.
+- **Con trỏ chuột gợi ý** (không cần giữ phím): di chuyển chuột qua quân cờ — ô của **quân cần đi** và **ô cần đến** (theo nước tốt nhất) con trỏ giữ nguyên hình **mũi tên**, còn ô cần đến mà **trống** thì hiện hình **bàn tay** (nổi bật trên các ô trống vốn là mũi tên). Nếu nước đi là **ăn quân** thì ô bị ăn cũng giữ mũi tên để phân biệt với các quân khác đang hiện bàn tay. Engine chạy nền liên tục nên gợi ý luôn sẵn sàng.
 
 Engine Stockfish (asm.js) chạy **hoàn toàn trong trình duyệt**, không gửi nước đi đi đâu cả. Kết quả cache theo thế cờ nên lần bấm sau là tức thì.
 
