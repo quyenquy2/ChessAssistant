@@ -24,6 +24,12 @@
       "js": ["lib/chess.min.js", "content.js"],
       "css": ["styles.css"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://*.chess.com/*"],
+      "js": ["fen-bridge.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [

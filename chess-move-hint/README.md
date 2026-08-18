@@ -40,16 +40,21 @@ Tránh `Ctrl+W`, `Ctrl+T`, `Ctrl+H`, `Ctrl+Shift+Q`, ... Trên macOS tránh `Ctr
 
 ```
 ┌──────────────────┐      ┌───────────────────────┐
-│ content.js       │ POST │ Worker (Stockfish)    │
-│  • đọc DOM bàn   │ ───► │  • phân tích UCI       │
-│  • build FEN     │  ◄── │  • depth 18, ≤900ms    │
-│  • show overlay  │ uci  │                       │
-│  • bắt phím tắt  │      └───────────────────────┘
+│ fen-bridge.js    │      │ Worker (Stockfish)    │
+│  (MAIN world)    │      │  • phân tích UCI       │
+│  • game.getFEN() │      │  • depth 18, ≤900ms    │
+│  • data-cc-hint- │ ───► │                       │
+│    fen attribute │  ◄── │                       │
+│ content.js       │ uci  │                       │
+│  • đọc attribute │      │                       │
+│  • show overlay  │      └───────────────────────┘
+│  • bắt phím tắt  │
 └──────────────────┘
 ```
 
+- FEN đọc từ API của chính chess.com (`wc-chess-board.game.getFEN()`), lấy qua **content script chạy trong MAIN world** (`fen-bridge.js`) vì `game` không truy cập được từ isolated world. Bridge ghi FEN vào attribute `data-cc-hint-fen` trên board element — content script đọc attribute này. Luôn đúng bên đi, kể cả khi cầm quân đen ở ván mới bắt đầu hoặc tải lại trang giữa ván (move list còn trống).
+- Nếu bridge chưa kịp ghi FEN (page vừa load), fallback về đọc DOM: class `square-11..88` (không còn `style.transform`).
 - Engine được load bằng **blob URL** (fetch extension asset, tạo Blob, `new Worker(blobUrl)`) vì content script không tạo Worker từ `chrome-extension://` trực tiếp được.
-- DOM bàn cờ dùng class `square-11..88` mới của chess.com (không còn `style.transform`).
 - Cache theo FEN — khi thế cờ đổi (đối thủ đi), engine tự tính lại qua MutationObserver.
 
 ## Cấu trúc thư mục
@@ -58,6 +63,7 @@ Tránh `Ctrl+W`, `Ctrl+T`, `Ctrl+H`, `Ctrl+Shift+Q`, ... Trên macOS tránh `Ctr
 chess-move-hint/
 ├── manifest.json          Manifest V3
 ├── content.js             Đọc DOM + điều phối engine + overlay
+├── fen-bridge.js          Content script MAIN world: đọc game.getFEN() → attribute
 ├── styles.css             Style overlay (góc phải, dark)
 ├── options.html           Popup cài phím tắt
 ├── options.js             Logic options

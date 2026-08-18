@@ -165,7 +165,37 @@
     }
     const parts = chesscomFenParts();
     if (parts && (parts[1] === 'b' || parts[1] === 'w')) return parts[1];
+    const pa = boardPlayingAs();
+    if (pa === 'black') return 'b';
+    if (pa === 'white') return 'w';
     return 'w';
+  }
+
+  function boardPlayingAs() {
+    try {
+      const board = document.querySelector('wc-board, .board');
+      if (board && board.game && typeof board.game.getPlayingAs === 'function') {
+        const c = board.game.getPlayingAs();
+        if (c === 'black' || c === 'white') return c;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function boardFen() {
+    try {
+      const board = document.querySelector('wc-chess-board, wc-board, .board');
+      if (board && board.game && typeof board.game.getFEN === 'function') {
+        const fen = board.game.getFEN();
+        if (typeof fen === 'string' && fen) return fen;
+      }
+    } catch (e) {}
+    try {
+      const board = document.querySelector('wc-chess-board, wc-board, .board');
+      const fen = board && board.getAttribute ? board.getAttribute('data-cc-hint-fen') : null;
+      if (typeof fen === 'string' && fen) return fen;
+    } catch (e) {}
+    return null;
   }
 
   function chesscomFenParts() {
@@ -252,6 +282,13 @@
   function readBoard() {
     const board = document.querySelector('wc-board, .board');
     if (!board) return null;
+    const authoritative = boardFen();
+    if (authoritative) {
+      try {
+        new Chess(authoritative);
+        return { fen: authoritative };
+      } catch (e) {}
+    }
     let fen = buildFen(parsePieces(board));
     try {
       new Chess(fen);
