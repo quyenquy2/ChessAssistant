@@ -597,6 +597,12 @@ function applyBoardCursorAt(x, y) {
       removeBoardCursor();
       return;
     }
+    // capture to-square: leave cursor to onBoardMouseOver (default), don't grab
+    const sqNum = (name.charCodeAt(0) - 96) * 10 + parseInt(name[1], 10);
+    if (document.querySelector('.piece.square-' + sqNum)) {
+      removeBoardCursor();
+      return;
+    }
     // set cursor on the topmost element at the point so it survives
     // overlays chess.com draws on top of the board (check / last-move /
     // legal-move highlight SVGs — common on diagonals for bishops/checks)
@@ -727,4 +733,8 @@ function applyBoardCursorAt(x, y) {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) hideIfUnheld();
   });
+
+  // self-heal: re-apply the to-square cursor periodically in case chess.com
+  // rebuilds highlight overlays on top of the board while the mouse is still
+  setInterval(refreshCursor, 300);
 })();

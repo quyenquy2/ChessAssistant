@@ -58,14 +58,9 @@ async function run() {
   const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
   const ctx = browser.contexts()[0];
   const p = await ctx.newPage();
-  await p.goto('https://www.chess.com/analysis', { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await p.waitForTimeout(6000);
-
-  await p.locator('.load-from-pgn-textarea').fill(FEN);
-  await p.locator('.cc-button-primary').first().click({ timeout: 5000 }).catch(async () => {
-    await p.keyboard.press('Enter');
-  });
-  await p.waitForTimeout(6000);
+  const fenEnc = encodeURIComponent(FEN).replace(/%20/g, '+');
+  await p.goto('https://www.chess.com/analysis?tab=analysis&fen=' + fenEnc, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await p.waitForTimeout(7000);
 
   const fen = await p.evaluate(() => {
     const cb = document.querySelector('wc-chess-board, wc-board, .board');
