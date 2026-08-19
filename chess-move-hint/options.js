@@ -1,7 +1,6 @@
 (() => {
   const DEFAULT_SHORTCUTS = [
     { ctrl: true, alt: false, shift: false, meta: false, key: 'KeyQ' },
-    { ctrl: false, alt: true, shift: false, meta: false, key: 'KeyQ' },
   ];
   const MOD_CODES = new Set([
     'ControlLeft', 'ControlRight',
@@ -116,7 +115,7 @@
     strength = ['fast', 'normal', 'strong', 'brutal'].includes(d.strength) ? d.strength : 'normal';
     strengthEl.value = strength;
     render();
-    setStatus('Mặc định: Ctrl + Q (trắng) · Alt + Q (đen)', 'ok');
+    setStatus('Mặc định: Ctrl + Q (show gợi ý), Alt + Q (recalibrate con trỏ)', 'ok');
   });
 
   function normalize(s) {

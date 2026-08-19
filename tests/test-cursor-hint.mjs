@@ -152,7 +152,7 @@ async function run() {
   });
   log('board fen:', fen);
 
-  const san = await hold(p, ['Alt']);
+  const san = await hold(p, ['Control']);
   log('best move:', san);
   if (!san || san === '…' || san === '—') fail('no best move');
   const ft = sanToFromTo(fen, san);

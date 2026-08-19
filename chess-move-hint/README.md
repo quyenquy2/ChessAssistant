@@ -3,8 +3,9 @@
 Extension Chrome Manifest V3 giúp bạn xem **nước đi tối ưu** trên chess.com bằng cách **giữ phím tắt** (mặc định `Ctrl + Q`).
 
 - **Giữ** phím tắt → ô nhỏ góc phải trên cùng hiện nước đi tốt nhất (SAN: `e4`, `Nf3`, `O-O`, `Qxd5+`, ...).
-- **Thả** phím tắt → ô biến mất ngay.
-- **Con trỏ chuột gợi ý** (không cần giữ phím): di chuyển chuột qua quân cờ — ô của **quân cần đi** và **ô cần đến** (theo nước tốt nhất) con trỏ giữ nguyên hình **mũi tên**, còn ô cần đến mà **trống** thì hiện hình **bàn tay** (nổi bật trên các ô trống vốn là mũi tên). Nếu nước đi là **ăn quân** thì ô bị ăn cũng giữ mũi tên để phân biệt với các quân khác đang hiện bàn tay. Engine chạy nền liên tục nên gợi ý luôn sẵn sàng.
+- **Thả** phím tắt → ô biến mất ngay. Mặc định `Ctrl + Q` (Alt + Q được dùng để **recalibrate** con trỏ ô đến — xem bên dưới).
+- **Con trỏ chuột gợi ý** (không cần giữ phím): di chuyển chuột qua quân cờ — ô của **quân cần đi** và **ô cần đến** (theo nước tốt nhất) con tr� giữ nguyên hình **mũi tên**, còn ô cần đến mà **trống** thì hiện hình **bàn tay** (nổi bật trên các ô trống vốn là mũi tên). Nếu nước đi là **ăn quân** thì ô bị ăn cũng giữ mũi tên để phân biệt với các quân khác đang hiện bàn tay. Engine chạy nền liên tục nên gợi � luôn sẵn sàng.
+- **Recalibrate (`Alt + Q`)**: nếu thấy con trỏ ô đến (bàn tay) **mất linh** sau nước đi mới, bấm `Alt + Q` để ép con trỏ refresh ngay tại vị trí chuột hiện tại — không cần di chuyển chuột. (Bình thường con trỏ cũng tự refresh khi best move đổi, nhưng `Alt + Q` là cách chắc chắn.)
 
 Engine Stockfish (asm.js) chạy **hoàn toàn trong trình duyệt**, không gửi nước đi đi đâu cả. Kết quả cache theo thế cờ nên lần bấm sau là tức thì.
 
@@ -22,6 +23,7 @@ Lần đầu vào `https://www.chess.com/play/...` (live game, /analysis, /play/
 1. Mở ván cờ trên chess.com.
 2. **Giữ `Ctrl + Q` (hoặc phím đã đặt)** → ô góc phải hiện nước đi tốt nhất + số đánh giá (eval) + độ sâu.
 3. **Thả phím** → ô biến mất.
+4. *(Tuỳ chọn)* Bấm **`Alt + Q`** để recalibrate con trỏ ô đến nếu thấy mất linh.
 
 ### Đổi phím tắt & độ thông minh
 

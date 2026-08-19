@@ -86,11 +86,18 @@ async function run() {
   if (sanAgain !== sanStart) fail(`cached move differs: ${sanStart} -> ${sanAgain}`);
   await expectHidden(page);
 
-  log('\n=== Test 3: Alt+Q second shortcut (white to move) ===');
-  const sanAlt = await holdAndGetSAN(page, 'Alt', 'Alt', 'second shortcut (Alt+Q)');
-  await expectHidden(page);
+  log('\n=== Test 3: Alt+Q is recalibrate (should NOT show hint) ===');
+  // press Alt+Q briefly; overlay must NOT appear
+  await page.keyboard.down('Alt');
+  await page.keyboard.down('q');
+  await page.waitForTimeout(600);
+  await page.keyboard.up('q');
+  await page.keyboard.up('Alt');
+  const showed = await page.evaluate(() => document.querySelector('#cc-hint')?.classList.contains('cc-show'));
+  if (showed) fail('Alt+Q should be recalibrate (no hint), but overlay was shown');
+  log('  Alt+Q did not show hint overlay. OK');
 
-  log('\n[PASS] Both Ctrl+Q and Alt+Q trigger the hint correctly.');
+  log('\n[PASS] Ctrl+Q shows hint; Alt+Q is reserved for recalibrate.');
   await context.close();
 }
 

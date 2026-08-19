@@ -76,7 +76,7 @@ async function run() {
   await closeModals(p);
   log('phase2 boards:', JSON.stringify(await getFen(p)));
 
-  const san = await hold(p, ['Alt']);
+  const san = await hold(p, ['Control']);
   log(`hint after reload (black to move) → "${san}"`);
 
   const fen = await getFen(p);

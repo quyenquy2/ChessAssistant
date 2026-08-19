@@ -69,7 +69,7 @@ async function run() {
   log('fen after e4:', fen);
   if (fen.split(' ')[1] !== 'b') fail('position is not black-to-move');
 
-  const san = await hold(p, ['Alt']);
+  const san = await hold(p, ['Control']);
   log(`hint (black to move) → "${san}"`);
   if (!san) fail('no hint returned');
   if (san === 'd4' || san.endsWith('=Q')) fail(`engine saw the wrong side: "${san}"`);

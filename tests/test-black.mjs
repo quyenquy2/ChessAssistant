@@ -51,7 +51,7 @@ async function run() {
   await p.locator('wc-board, .board').first().click({ position: { x: 50, y: 50 } });
   await p.waitForTimeout(200);
 
-  const san = await hold(p, 'Alt');
+  const san = await hold(p, 'Control');
   log(`ALT+Q (black to move) → "${san}"`);
   if (!san) fail('no move returned');
 

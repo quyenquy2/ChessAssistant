@@ -25,20 +25,28 @@
     engineError: null,
   };
 
+  let lastMouse = null;
+
   const DEFAULT_SHORTCUTS = [
     { ctrl: true, alt: false, shift: false, meta: false, key: 'KeyQ' },
-    { ctrl: false, alt: true, shift: false, meta: false, key: 'KeyQ' },
   ];
 
   let shortcuts = DEFAULT_SHORTCUTS.slice();
 
+  function isAltQ(s) {
+    return s && s.key === 'KeyQ' && s.alt && !s.ctrl && !s.shift && !s.meta;
+  }
+
   function loadShortcutsFromStorage() {
     chrome.storage.sync.get(['shortcuts', 'shortcut'], (d) => {
       if (Array.isArray(d.shortcuts) && d.shortcuts.length) {
-        shortcuts = d.shortcuts.filter(isValidShortcut);
-        if (shortcuts.length === 0) shortcuts = DEFAULT_SHORTCUTS.slice();
+        const cleaned = d.shortcuts.filter(isValidShortcut).filter((s) => !isAltQ(s));
+        shortcuts = cleaned.length ? cleaned : DEFAULT_SHORTCUTS.slice();
+        if (cleaned.length !== d.shortcuts.filter(isValidShortcut).length) {
+          chrome.storage.sync.set({ shortcuts });
+        }
       } else if (d.shortcut) {
-        shortcuts = [{ ...DEFAULT_SHORTCUTS[0], ...d.shortcut }];
+        shortcuts = isAltQ(d.shortcut) ? DEFAULT_SHORTCUTS.slice() : [{ ...DEFAULT_SHORTCUTS[0], ...d.shortcut }];
         chrome.storage.sync.set({ shortcuts });
       }
     });
@@ -75,8 +83,8 @@
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'sync') return;
     if (changes.shortcuts && changes.shortcuts.newValue) {
-      const next = (changes.shortcuts.newValue || []).filter(isValidShortcut);
-      shortcuts = next.length ? next : DEFAULT_SHORTCUTS.slice();
+      const filtered = changes.shortcuts.newValue.filter(isValidShortcut).filter((s) => !isAltQ(s));
+      shortcuts = filtered.length ? filtered : DEFAULT_SHORTCUTS.slice();
     }
     if (changes.strength && changes.strength.newValue !== changes.strength.oldValue) {
       applyStrength(changes.strength.newValue);
@@ -92,7 +100,7 @@
   function reloadForStrength() {
     state.cache.clear();
     state.best = null;
-    removeBoardCursor();
+    refreshCursor();
     warmup();
   }
 
@@ -135,6 +143,10 @@
 
   function isComboKey(e) {
     return anyKeyOfShortcuts(e);
+  }
+
+  function isRecalibrateCombo(e) {
+    return e.code === 'KeyQ' && e.altKey && !e.ctrlKey && !e.shiftKey && !e.metaKey;
   }
 
   function isTypingTarget(e) {
@@ -418,6 +430,7 @@
         bm && bm !== '0000' && bm.length >= 4
           ? { from: bm.slice(0, 2), to: bm.slice(2, 4) }
           : null;
+      refreshCursor();
       if (bm && bm !== '0000') {
         const san = toSan(fen, bm);
         if (san) {
@@ -486,7 +499,7 @@
     if (!pos) return;
     if (state.lastFen === pos.fen) return;
     state.best = null;
-    removeBoardCursor();
+    refreshCursor();
     requestMove(pos.fen);
   }
 
@@ -558,33 +571,42 @@
     return { board, xMin: r.left, yMin: r.top, cell: r.width / 8, flippedX: false, flippedY: false };
   }
 
+function applyBoardCursorAt(x, y) {
+    const fen = currentFenLight();
+    if (!fen || fen !== state.lastFen || !state.best || !isUserTurn()) {
+      removeBoardCursor();
+      return;
+    }
+    const g = gridCalibration();
+    if (!g) return;
+    const colIdx = Math.floor((x - g.xMin) / g.cell - 1e-6);
+    const rowIdx = Math.floor((y - g.yMin) / g.cell - 1e-6);
+    if (colIdx < 0 || colIdx > 7 || rowIdx < 0 || rowIdx > 7) {
+      removeBoardCursor();
+      return;
+    }
+    const col = g.flippedX ? 7 - colIdx : colIdx;
+    const rank = g.flippedY ? rowIdx : 7 - rowIdx;
+    const name = String.fromCharCode(97 + col) + (rank + 1);
+    if (name === state.best.to) {
+      g.board.style.setProperty('cursor', 'grab', 'important');
+    } else {
+      removeBoardCursor();
+    }
+  }
+
+  function refreshCursor() {
+    if (lastMouse) applyBoardCursorAt(lastMouse.x, lastMouse.y);
+  }
+
   let moveRaf = 0;
   function onBoardMouseMove(e) {
+    lastMouse = { x: e.clientX, y: e.clientY };
     if (readSquare(e.target) != null) return;
     if (moveRaf) return;
     moveRaf = requestAnimationFrame(() => {
       moveRaf = 0;
-      const fen = currentFenLight();
-      if (!fen || fen !== state.lastFen || !state.best || !isUserTurn()) {
-        removeBoardCursor();
-        return;
-      }
-      const g = gridCalibration();
-      if (!g) return;
-      const colIdx = Math.floor((e.clientX - g.xMin) / g.cell - 1e-6);
-      const rowIdx = Math.floor((e.clientY - g.yMin) / g.cell - 1e-6);
-      if (colIdx < 0 || colIdx > 7 || rowIdx < 0 || rowIdx > 7) {
-        removeBoardCursor();
-        return;
-      }
-      const col = g.flippedX ? 7 - colIdx : colIdx;
-      const rank = g.flippedY ? rowIdx : 7 - rowIdx;
-      const name = String.fromCharCode(97 + col) + (rank + 1);
-      if (name === state.best.to) {
-        g.board.style.setProperty('cursor', 'grab', 'important');
-      } else {
-        removeBoardCursor();
-      }
+      applyBoardCursorAt(e.clientX, e.clientY);
     });
   }
 
@@ -622,7 +644,14 @@
   }
 
   function onKeyDown(e) {
-    if (e.repeat || isTypingTarget(e) || !comboMatches(e)) return;
+    if (e.repeat || isTypingTarget(e)) return;
+    if (isRecalibrateCombo(e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      refreshCursor();
+      return;
+    }
+    if (!comboMatches(e)) return;
     state.held = true;
     showHint();
     const pos = readBoard();

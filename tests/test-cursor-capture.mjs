@@ -74,7 +74,7 @@ async function run() {
   log('board fen:', fen);
   if (!fen.startsWith('rnbqkbnr/pppppppp/8/4n3')) fail('FEN did not load');
 
-  const san = await hold(p, ['Alt']);
+  const san = await hold(p, ['Control']);
   log('best move:', san);
   if (!san || san === '…' || san === '—') fail('no best move');
   if (!san.includes('x')) fail('expected a capture move, got ' + san);
