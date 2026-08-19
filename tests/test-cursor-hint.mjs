@@ -98,11 +98,16 @@ async function squareCenter(p, name) {
   return { x: g.xMin + (colIdx + 0.5) * g.cell, y: g.yMin + (rowIdx + 0.5) * g.cell };
 }
 
+let lastPt = null;
 async function boardCursor(p) {
-  return p.evaluate(() => {
+  if (!lastPt) return p.evaluate(() => {
     const b = document.querySelector('wc-chess-board, wc-board, .board');
     return b ? getComputedStyle(b).cursor : 'no-board';
   });
+  return p.evaluate(({ x, y }) => {
+    const el = document.elementFromPoint(x, y);
+    return el ? getComputedStyle(el).cursor : 'none';
+  }, lastPt);
 }
 
 async function run() {
@@ -178,7 +183,7 @@ async function run() {
     const toCenter = await squareCenter(p, ft.to);
     log('to-square center:', JSON.stringify(toCenter));
     if (!toCenter) fail('cannot calibrate board');
-    await p.mouse.move(toCenter.x, toCenter.y);
+    await p.mouse.move(toCenter.x, toCenter.y); lastPt = toCenter;
     await p.waitForTimeout(400);
     let bc = await boardCursor(p);
     log(`hover to (${ft.to}, empty via coords): board cursor = ${bc}`);
@@ -195,7 +200,7 @@ async function run() {
     });
     const edgeX = toCenter.x + 0.3 * g2.cell;
     const edgeY = toCenter.y + 0.3 * g2.cell;
-    await p.mouse.move(edgeX, edgeY);
+    await p.mouse.move(edgeX, edgeY); lastPt = { x: edgeX, y: edgeY };
     await p.waitForTimeout(400);
     bc = await boardCursor(p);
     log(`hover to near bottom-right edge (${ft.to}): board cursor = ${bc}`);
@@ -216,7 +221,7 @@ async function run() {
   }
   if (!otherEmpty) fail('no empty square candidate');
   const oc = await squareCenter(p, otherEmpty);
-  await p.mouse.move(oc.x, oc.y);
+  await p.mouse.move(oc.x, oc.y); lastPt = oc;
   await p.waitForTimeout(400);
   let bc = await boardCursor(p);
   log(`hover other empty (${otherEmpty}): board cursor = ${bc}`);

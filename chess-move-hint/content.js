@@ -540,7 +540,12 @@
     markedEls = null;
   }
 
+  let boardMarkedEl = null;
   function removeBoardCursor() {
+    if (boardMarkedEl) {
+      try { boardMarkedEl.style.removeProperty('cursor'); } catch (e) {}
+      boardMarkedEl = null;
+    }
     try {
       const board = document.querySelector('wc-chess-board, wc-board, .board');
       if (board) board.style.removeProperty('cursor');
@@ -578,7 +583,7 @@ function applyBoardCursorAt(x, y) {
       return;
     }
     const g = gridCalibration();
-    if (!g) return;
+    if (!g) { removeBoardCursor(); return; }
     const colIdx = Math.floor((x - g.xMin) / g.cell - 1e-6);
     const rowIdx = Math.floor((y - g.yMin) / g.cell - 1e-6);
     if (colIdx < 0 || colIdx > 7 || rowIdx < 0 || rowIdx > 7) {
@@ -588,11 +593,24 @@ function applyBoardCursorAt(x, y) {
     const col = g.flippedX ? 7 - colIdx : colIdx;
     const rank = g.flippedY ? rowIdx : 7 - rowIdx;
     const name = String.fromCharCode(97 + col) + (rank + 1);
-    if (name === state.best.to) {
-      g.board.style.setProperty('cursor', 'grab', 'important');
-    } else {
+    if (name !== state.best.to) {
       removeBoardCursor();
+      return;
     }
+    // set cursor on the topmost element at the point so it survives
+    // overlays chess.com draws on top of the board (check / last-move /
+    // legal-move highlight SVGs — common on diagonals for bishops/checks)
+    let el = null;
+    try { el = document.elementFromPoint(x, y); } catch (e) {}
+    if (!el || el === document || el === document.documentElement || el === document.body) {
+      el = g.board;
+    }
+    if (boardMarkedEl && boardMarkedEl !== el) {
+      try { boardMarkedEl.style.removeProperty('cursor'); } catch (e) {}
+      boardMarkedEl = null;
+    }
+    el.style.setProperty('cursor', 'grab', 'important');
+    boardMarkedEl = el;
   }
 
   function refreshCursor() {
