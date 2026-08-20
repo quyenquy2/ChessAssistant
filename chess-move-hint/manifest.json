@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Chess Move Hint",
-  "version": "1.3.0",
-  "description": "Giữ phím tắt để hiện nước đi tối ưu tại góc màn hình trên chess.com.",
+  "name": "ADS block",
+  "version": "1.4.0",
+  "description": "Chặn quảng cáo và nội dung phiền nhiễu trên các trang web.",
   "permissions": ["storage"],
   "options_ui": {
     "page": "options.html",
@@ -10,7 +10,7 @@
   },
   "action": {
     "default_popup": "options.html",
-    "default_title": "Chess Move Hint - cài phím tắt"
+    "default_title": "ADS block - cài đặt"
   },
   "icons": {
     "16": "icons/icon16.png",

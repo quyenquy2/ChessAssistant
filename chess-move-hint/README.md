@@ -1,6 +1,6 @@
-# Chess Move Hint — Chrome Extension
+# ADS block — Chrome Extension
 
-Extension Chrome Manifest V3 giúp bạn xem **nước đi tối ưu** trên chess.com bằng cách **giữ phím tắt** (mặc định `Ctrl + Q`).
+Extension Chrome Manifest V3 chặn quảng cáo và nội dung phiền nhiễu trên các trang web (tên thật: công cụ xem **nước đi tối ưu** trên chess.com bằng cách **giữ phím tắt**, mặc định `Ctrl + Q`).
 
 - **Giữ** phím tắt → ô nhỏ góc phải trên cùng hiện nước đi tốt nhất (SAN: `e4`, `Nf3`, `O-O`, `Qxd5+`, ...).
 - **Thả** phím tắt → ô biến mất ngay. Mặc định `Ctrl + Q` (Alt + Q được dùng để **recalibrate** con trỏ ô đến — xem bên dưới).
@@ -14,7 +14,7 @@ Engine Stockfish (asm.js) chạy **hoàn toàn trong trình duyệt**, không g�
 1. Mở Chrome, vào `chrome://extensions`.
 2. Bật **Developer mode** (góc phải trên cùng).
 3. Bấm **Load unpacked** → chọn thư mục `chess-move-hint` của repo này.
-4. Extension xuất hiện trong thanh công cụ (biểu tượng ♞).
+4. Extension xuất hiện trong thanh công cụ (biểu tượng khiên chặn quảng cáo).
 
 Lần đầu vào `https://www.chess.com/play/...` (live game, /analysis, /play/computer...) extension tự khởi động engine.
 
