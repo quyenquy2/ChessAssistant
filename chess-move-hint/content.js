@@ -25,8 +25,6 @@
     engineError: null,
   };
 
-  let lastMouse = null;
-
   const DEFAULT_SHORTCUTS = [
     { ctrl: true, alt: false, shift: false, meta: false, key: 'KeyQ' },
   ];
@@ -100,7 +98,6 @@
   function reloadForStrength() {
     state.cache.clear();
     state.best = null;
-    refreshCursor();
     warmup();
   }
 
@@ -143,10 +140,6 @@
 
   function isComboKey(e) {
     return anyKeyOfShortcuts(e);
-  }
-
-  function isRecalibrateCombo(e) {
-    return e.code === 'KeyQ' && e.altKey && !e.ctrlKey && !e.shiftKey && !e.metaKey;
   }
 
   function isTypingTarget(e) {
@@ -430,7 +423,6 @@
         bm && bm !== '0000' && bm.length >= 4
           ? { from: bm.slice(0, 2), to: bm.slice(2, 4) }
           : null;
-      refreshCursor();
       if (bm && bm !== '0000') {
         const san = toSan(fen, bm);
         if (san) {
@@ -499,182 +491,12 @@
     if (!pos) return;
     if (state.lastFen === pos.fen) return;
     state.best = null;
-    refreshCursor();
     requestMove(pos.fen);
   }
 
-  function currentFenLight() {
-    try {
-      const board = document.querySelector('wc-chess-board, wc-board, .board');
-      const fen = board && board.getAttribute ? board.getAttribute('data-cc-hint-fen') : null;
-      if (typeof fen === 'string' && fen) return fen;
-    } catch (e) {}
-    return null;
-  }
-
-  function squareName(sq) {
-    const fileIdx = Math.floor(sq / 10) - 1;
-    if (fileIdx < 0 || fileIdx > 7) return null;
-    return String.fromCharCode(97 + fileIdx) + (sq % 10);
-  }
-
-  function isUserTurn() {
-    try {
-      if ((location.pathname || '').includes('/analysis')) return true;
-      const fen = currentFenLight();
-      if (!fen) return false;
-      const turn = fen.split(' ')[1];
-      if (turn !== 'b' && turn !== 'w') return false;
-      const board = document.querySelector('wc-chess-board, wc-board, .board');
-      const flipped = !!(board && board.classList && board.classList.contains('flipped'));
-      return flipped ? turn === 'b' : turn === 'w';
-    } catch (e) {
-      return true;
-    }
-  }
-
-  let markedEls = null;
-  function clearHintCursor() {
-    if (!markedEls) return;
-    for (const el of markedEls) el.style.removeProperty('cursor');
-    markedEls = null;
-  }
-
-  let boardMarkedEl = null;
-  function removeBoardCursor() {
-    if (boardMarkedEl) {
-      try { boardMarkedEl.style.removeProperty('cursor'); } catch (e) {}
-      boardMarkedEl = null;
-    }
-    try {
-      const board = document.querySelector('wc-chess-board, wc-board, .board');
-      if (board) board.style.removeProperty('cursor');
-    } catch (e) {}
-  }
-
-  function gridCalibration() {
-    const board = document.querySelector('wc-chess-board, wc-board, .board');
-    if (!board) return null;
-    const p11 = document.querySelector('.piece.square-11');
-    const p88 = document.querySelector('.piece.square-88');
-    if (p11 && p88) {
-      const r1 = p11.getBoundingClientRect();
-      const r2 = p88.getBoundingClientRect();
-      const cell = Math.abs(r2.left - r1.left) / 7;
-      if (cell > 0 && isFinite(cell)) {
-        return {
-          board,
-          xMin: Math.min(r1.left, r2.left),
-          yMin: Math.min(r1.top, r2.top),
-          cell,
-          flippedX: r1.left > r2.left,
-          flippedY: r1.top < r2.top,
-        };
-      }
-    }
-    const r = board.getBoundingClientRect();
-    return { board, xMin: r.left, yMin: r.top, cell: r.width / 8, flippedX: false, flippedY: false };
-  }
-
-function applyBoardCursorAt(x, y) {
-    const fen = currentFenLight();
-    if (!fen || fen !== state.lastFen || !state.best || !isUserTurn()) {
-      removeBoardCursor();
-      return;
-    }
-    const g = gridCalibration();
-    if (!g) { removeBoardCursor(); return; }
-    const colIdx = Math.floor((x - g.xMin) / g.cell - 1e-6);
-    const rowIdx = Math.floor((y - g.yMin) / g.cell - 1e-6);
-    if (colIdx < 0 || colIdx > 7 || rowIdx < 0 || rowIdx > 7) {
-      removeBoardCursor();
-      return;
-    }
-    const col = g.flippedX ? 7 - colIdx : colIdx;
-    const rank = g.flippedY ? rowIdx : 7 - rowIdx;
-    const name = String.fromCharCode(97 + col) + (rank + 1);
-    if (name !== state.best.to) {
-      removeBoardCursor();
-      return;
-    }
-    // capture to-square: leave cursor to onBoardMouseOver (default), don't grab
-    const sqNum = (name.charCodeAt(0) - 96) * 10 + parseInt(name[1], 10);
-    if (document.querySelector('.piece.square-' + sqNum)) {
-      removeBoardCursor();
-      return;
-    }
-    // set cursor on the topmost element at the point so it survives
-    // overlays chess.com draws on top of the board (check / last-move /
-    // legal-move highlight SVGs — common on diagonals for bishops/checks)
-    let el = null;
-    try { el = document.elementFromPoint(x, y); } catch (e) {}
-    if (!el || el === document || el === document.documentElement || el === document.body) {
-      el = g.board;
-    }
-    if (boardMarkedEl && boardMarkedEl !== el) {
-      try { boardMarkedEl.style.removeProperty('cursor'); } catch (e) {}
-      boardMarkedEl = null;
-    }
-    el.style.setProperty('cursor', 'grab', 'important');
-    boardMarkedEl = el;
-  }
-
-  function refreshCursor() {
-    if (lastMouse) applyBoardCursorAt(lastMouse.x, lastMouse.y);
-  }
-
-  let moveRaf = 0;
-  function onBoardMouseMove(e) {
-    lastMouse = { x: e.clientX, y: e.clientY };
-    if (readSquare(e.target) != null) return;
-    if (moveRaf) return;
-    moveRaf = requestAnimationFrame(() => {
-      moveRaf = 0;
-      applyBoardCursorAt(e.clientX, e.clientY);
-    });
-  }
-
-  function onBoardMouseOver(e) {
-    let el = e.target;
-    let sq = readSquare(el);
-    if (sq == null && el.parentElement) {
-      el = el.parentElement;
-      sq = readSquare(el);
-    }
-    if (sq == null) {
-      clearHintCursor();
-      return;
-    }
-    const fen = currentFenLight();
-    const squares = fen && fen === state.lastFen ? state.best : null;
-    if (!squares || !isUserTurn()) {
-      clearHintCursor();
-      removeBoardCursor();
-      return;
-    }
-    removeBoardCursor();
-    const name = squareName(sq);
-    let cursor = null;
-    if (name === squares.from) cursor = 'default';
-    else if (name === squares.to) cursor = 'default';
-    if (!cursor) {
-      clearHintCursor();
-      return;
-    }
-    if (markedEls && markedEls.has(el)) return;
-    clearHintCursor();
-    el.style.setProperty('cursor', cursor, 'important');
-    markedEls = new Set([el]);
-  }
 
   function onKeyDown(e) {
     if (e.repeat || isTypingTarget(e)) return;
-    if (isRecalibrateCombo(e)) {
-      e.preventDefault();
-      e.stopPropagation();
-      refreshCursor();
-      return;
-    }
     if (!comboMatches(e)) return;
     state.held = true;
     showHint();
@@ -727,14 +549,8 @@ function applyBoardCursorAt(x, y) {
 
   window.addEventListener('keydown', onKeyDown, true);
   window.addEventListener('keyup', onKeyUp, true);
-  document.addEventListener('mouseover', onBoardMouseOver, true);
-  document.addEventListener('mousemove', onBoardMouseMove, true);
   window.addEventListener('blur', hideIfUnheld);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) hideIfUnheld();
   });
-
-  // self-heal: re-apply the to-square cursor periodically in case chess.com
-  // rebuilds highlight overlays on top of the board while the mouse is still
-  setInterval(refreshCursor, 300);
 })();

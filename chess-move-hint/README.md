@@ -3,9 +3,7 @@
 Extension Chrome Manifest V3 chặn quảng cáo và nội dung phiền nhiễu trên các trang web (tên thật: công cụ xem **nước đi tối ưu** trên chess.com bằng cách **giữ phím tắt**, mặc định `Ctrl + Q`).
 
 - **Giữ** phím tắt → ô nhỏ góc phải trên cùng hiện nước đi tốt nhất (SAN: `e4`, `Nf3`, `O-O`, `Qxd5+`, ...).
-- **Thả** phím tắt → ô biến mất ngay. Mặc định `Ctrl + Q` (Alt + Q được dùng để **recalibrate** con trỏ ô đến — xem bên dưới).
-- **Con trỏ chuột gợi ý** (không cần giữ phím): di chuyển chuột qua quân cờ — ô của **quân cần đi** và **ô cần đến** (theo nước tốt nhất) con tr� giữ nguyên hình **mũi tên**, còn ô cần đến mà **trống** thì hiện hình **bàn tay** (nổi bật trên các ô trống vốn là mũi tên). Nếu nước đi là **ăn quân** thì ô bị ăn cũng giữ mũi tên để phân biệt với các quân khác đang hiện bàn tay. Engine chạy nền liên tục nên gợi � luôn sẵn sàng.
-- **Recalibrate (`Alt + Q`)**: nếu thấy con trỏ ô đến (bàn tay) **mất linh** sau nước đi mới, bấm `Alt + Q` để ép con trỏ refresh ngay tại vị trí chuột hiện tại — không cần di chuyển chuột. (Bình thường con trỏ cũng tự refresh khi best move đổi, nhưng `Alt + Q` là cách chắc chắn.)
+- **Thả** phím tắt → ô biến mất ngay. Mặc định `Ctrl + Q`.
 
 Engine Stockfish (asm.js) chạy **hoàn toàn trong trình duyệt**, không gửi nước đi đi đâu cả. Kết quả cache theo thế cờ nên lần bấm sau là tức thì.
 
